@@ -42,6 +42,10 @@ function createField(dimension = 3) {
 
 function cellClickHandler (row, col) {
     console.log(`Clicked on cell: ${row}, ${col}`);
+
+    if (FIELD[row][col] != EMPTY)
+        return;
+    
     FIELD[row][col] = turn;
     renderSymbolInCell(turn, row, col);
     turn = turn === CROSS ? ZERO : CROSS;
