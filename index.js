@@ -6,13 +6,15 @@ const container = document.getElementById('fieldWrapper');
 
 const FIELD = createField()
 
+let dimension = 3;
 let turn = CROSS;
+let movesCount = dimension * dimension;
 
 startGame();
 addResetListener();
 
 function startGame() {
-    const dimension = prompt('Введите размер поля. (Например, 3 для поля 3х3)', 3);
+    dimension = prompt('Введите размер поля. (Например, 3 для поля 3х3)', 3);
     renderGrid(dimension);
 }
 
@@ -47,7 +49,13 @@ function cellClickHandler(row, col) {
     if (FIELD[row][col] !== EMPTY)
         return;
 
-    if (!hasEmptyCelLs()){
+    const winner = findWinner(row, col);
+    if (winner) {
+
+        return;
+    }
+
+    if (movesCount) {
         alert('Победила дружба');
         return;
     }
@@ -55,18 +63,19 @@ function cellClickHandler(row, col) {
     FIELD[row][col] = turn;
     renderSymbolInCell(turn, row, col);
     turn = turn === CROSS ? ZERO : CROSS;
+    movesCount--;
 }
 
-function hasWinner() {
+function findWinner() {
     for (let i = 0; i < FIELD.length; i++) {
-        if (FIELD[i].every(x => x === FIELD[i][0])) {
-            return true;
+        if (FIELD[i][0] !== EMPTY && FIELD[i].every(x => x === FIELD[i][0])) {
+            return FIELD[i];
         }
     }
 
     for (let i = 0; i < FIELD.length; i++) {
-        if (FIELD.map(arr => arr[i]).every(x => x === FIELD[0][i])) {
-            return true;
+        if (FIELD[0][i] && FIELD.map(arr => arr[i]).every(x => x === FIELD[0][i])) {
+            return FIELD.map(arr => arr[i]);
         }
     }
 
@@ -78,15 +87,13 @@ function hasWinner() {
         diagonal.push(FIELD[i][FIELD[0].length - i - 1])
     }
 
-    return mainDiagonal.every(x => x === diagonal[0])
-        || otherDiagonal.every(x => x === diagonal[0])
-}
-
-function hasEmptyCelLs() {
-    for (let i = 0; i < FIELD.length; i++) {
-        if (FIELD[i] === EMPTY)
-            return true;
+    if (mainDiagonal.every(x => x === diagonal[0])){
+        return mainDiagonal;
     }
+    else if (otherDiagonal.every(x => x === diagonal[0])){
+        return otherDiagonal;
+    }
+
     return false;
 }
 
