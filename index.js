@@ -56,6 +56,31 @@ function cellClickHandler(row, col) {
     turn = turn === CROSS ? ZERO : CROSS;
 }
 
+function hasWinner() {
+    for (let i = 0; i < FIELD.length; i++) {
+        if (FIELD[i].every(x => x === FIELD[i][0])) {
+            return true;
+        }
+    }
+
+    for (let i = 0; i < FIELD.length; i++) {
+        if (FIELD.map(arr => arr[i]).every(x => x === FIELD[0][i])) {
+            return true;
+        }
+    }
+
+    let mainDiagonal = [];
+    let otherDiagonal = [];
+
+    for (let i = 0; i < FIELD.length; i++) {
+        diagonal.push(FIELD[i][i])
+        diagonal.push(FIELD[i][FIELD[0].length - i - 1])
+    }
+
+    return mainDiagonal.every(x => x === diagonal[0])
+        || otherDiagonal.every(x => x === diagonal[0])
+}
+
 function hasEmptyCelLs() {
     for (let i = 0; i < FIELD.length; i++) {
         if (FIELD[i] === EMPTY)
