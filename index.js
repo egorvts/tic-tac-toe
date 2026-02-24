@@ -4,6 +4,10 @@ const EMPTY = ' ';
 
 const container = document.getElementById('fieldWrapper');
 
+const FIELD = createField()
+    
+let turn = ZERO;
+
 startGame();
 addResetListener();
 
@@ -26,14 +30,19 @@ function renderGrid (dimension) {
     }
 }
 
+function createField(dimension = 3) {
+    let field = []
+
+    for (let i = 0; i < dimension; i++){
+        field.push(Array(dimension).fill(EMPTY));
+    }
+
+    return field;
+}
+
 function cellClickHandler (row, col) {
-    // Пиши код тут
     console.log(`Clicked on cell: ${row}, ${col}`);
-
-
-    /* Пользоваться методом для размещения символа в клетке так:
-        renderSymbolInCell(ZERO, row, col);
-     */
+    renderSymbolInCell(ZERO, row, col);
 }
 
 function renderSymbolInCell (symbol, row, col, color = '#333') {
