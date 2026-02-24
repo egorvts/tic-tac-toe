@@ -4,18 +4,39 @@ const EMPTY = ' ';
 
 const container = document.getElementById('fieldWrapper');
 
-const FIELD = createField()
-
+let FIELD = [];
 let dimension = 3;
-let turn = CROSS;
-let movesCount = dimension * dimension;
+let turn;
+let movesCount;
+let gameOver = false;
 
 startGame();
 addResetListener();
 
 function startGame() {
-    dimension = prompt('Введите размер поля. (Например, 3 для поля 3х3)', 3);
+    let input = prompt('Введите размер поля (например 3)', 3);
+    dimension = Number(input);
+
+    if (!dimension || dimension < 2) {
+        dimension = 3;
+    }
+
+    FIELD = createField(dimension);
+    movesCount = dimension * dimension;
+    turn = CROSS;
+    gameOver = false;
+
     renderGrid(dimension);
+}
+
+function createField(dimension) {
+    let field = [];
+
+    for (let i = 0; i < dimension; i++) {
+        field.push(Array(dimension).fill(EMPTY));
+    }
+
+    return field;
 }
 
 function renderGrid(dimension) {
@@ -33,84 +54,96 @@ function renderGrid(dimension) {
     }
 }
 
-function createField(dimension = 3) {
-    let field = []
-
-    for (let i = 0; i < dimension; i++) {
-        field.push(Array(dimension).fill(EMPTY));
-    }
-
-    return field;
-}
-
 function cellClickHandler(row, col) {
-    console.log(`Clicked on cell: ${row}, ${col}`);
 
-    if (FIELD[row][col] !== EMPTY)
-        return;
+    if (gameOver) return;
+
+    if (FIELD[row][col] !== EMPTY) return;
 
     FIELD[row][col] = turn;
     renderSymbolInCell(turn, row, col);
-    turn = turn === CROSS ? ZERO : CROSS;
     movesCount--;
 
-    const winner = findWinner(row, col);
-    if (winner) {
+    const winnerData = findWinner();
+
+    if (winnerData) {
+        const { winner, cells } = winnerData;
+
+        cells.forEach(([r, c]) => {
+            renderSymbolInCell(FIELD[r][c], r, c, 'red');
+        });
+
+        alert(`Победил ${winner}`);
+        gameOver = true;
         return;
     }
 
-    if (movesCount) {
+    if (movesCount === 0) {
         alert('Победила дружба');
+        gameOver = true;
         return;
     }
+
+    turn = turn === CROSS ? ZERO : CROSS;
 }
 
 function findWinner() {
-    for (let i = 0; i < FIELD.length; i++) {
-        if (FIELD[i][0] !== EMPTY && FIELD[i].every(x => x === FIELD[i][0])) {
-            for (let j = 0; j < FIELD[0].length; j++){
-                renderSymbolInCell(FIELD[i][j], i, j, '#F00')
-            }
-            return FIELD[i];
+
+    const size = FIELD.length;
+
+    // Проверка строк
+    for (let i = 0; i < size; i++) {
+        if (
+            FIELD[i][0] !== EMPTY &&
+            FIELD[i].every(cell => cell === FIELD[i][0])
+        ) {
+            return {
+                winner: FIELD[i][0],
+                cells: FIELD[i].map((_, index) => [i, index])
+            };
         }
     }
 
-    for (let i = 0; i < FIELD.length; i++) {
-        if (FIELD[0][i] && FIELD.map(arr => arr[i]).every(x => x === FIELD[0][i])) {
-            for (let j = 0; j < FIELD.length; j++){
-                renderSymbolInCell(FIELD[j][i], j, i, '#F00')
-            }
-            return FIELD.map(arr => arr[i]);
+    for (let i = 0; i < size; i++) {
+        const column = FIELD.map(row => row[i]);
+
+        if (column[0] !== EMPTY && column.every(cell => cell === column[0])) {
+            return {
+                winner: column[0],
+                cells: column.map((_, index) => [index, i])
+            };
         }
     }
 
     let mainDiagonal = [];
+    for (let i = 0; i < size; i++) {
+        mainDiagonal.push(FIELD[i][i]);
+    }
+
+    if (mainDiagonal[0] !== EMPTY && mainDiagonal.every(cell => cell === mainDiagonal[0])) {
+        return {
+            winner: mainDiagonal[0],
+            cells: mainDiagonal.map((_, index) => [index, index])
+        };
+    }
+
     let otherDiagonal = [];
-
-    for (let i = 0; i < FIELD.length; i++) {
-        diagonal.push(FIELD[i][i])
-        diagonal.push(FIELD[i][FIELD[0].length - i - 1])
+    for (let i = 0; i < size; i++) {
+        otherDiagonal.push(FIELD[i][size - i - 1]);
     }
 
-    if (mainDiagonal.every(x => x === diagonal[0])) {
-        for (let i = 0; i < FIELDlength; i++){
-            renderSymbolInCell(FIELD[i][i], i, i, '#F00')
-        }
-        return mainDiagonal;
-    }
-    else if (otherDiagonal.every(x => x === diagonal[0])) {
-        for (let i = 0; i < FIELDlength; i++){
-            renderSymbolInCell(FIELD[i][FIELD.length - i - 1], i, FIELD.length - i - 1, '#F00')
-        }
-        return otherDiagonal;
+    if (otherDiagonal[0] !== EMPTY && otherDiagonal.every(cell => cell === otherDiagonal[0])) {
+        return {
+            winner: otherDiagonal[0],
+            cells: otherDiagonal.map((_, index) => [index, size - index - 1])
+        };
     }
 
-    return false;
+    return null;
 }
 
 function renderSymbolInCell(symbol, row, col, color = '#333') {
     const targetCell = findCell(row, col);
-
     targetCell.textContent = symbol;
     targetCell.style.color = color;
 }
@@ -126,37 +159,5 @@ function addResetListener() {
 }
 
 function resetClickHandler() {
-    console.log('reset!');
-}
-
-
-/* Test Function */
-
-/* Победа первого игрока */
-function testWin() {
-    clickOnCell(0, 2);
-    clickOnCell(0, 0);
-    clickOnCell(2, 0);
-    clickOnCell(1, 1);
-    clickOnCell(2, 2);
-    clickOnCell(1, 2);
-    clickOnCell(2, 1);
-}
-
-/* Ничья */
-function testDraw() {
-    clickOnCell(2, 0);
-    clickOnCell(1, 0);
-    clickOnCell(1, 1);
-    clickOnCell(0, 0);
-    clickOnCell(1, 2);
-    clickOnCell(1, 2);
-    clickOnCell(0, 2);
-    clickOnCell(0, 1);
-    clickOnCell(2, 1);
-    clickOnCell(2, 2);
-}
-
-function clickOnCell(row, col) {
-    findCell(row, col).click();
+    startGame();
 }
