@@ -49,9 +49,13 @@ function cellClickHandler(row, col) {
     if (FIELD[row][col] !== EMPTY)
         return;
 
+    FIELD[row][col] = turn;
+    renderSymbolInCell(turn, row, col);
+    turn = turn === CROSS ? ZERO : CROSS;
+    movesCount--;
+
     const winner = findWinner(row, col);
     if (winner) {
-
         return;
     }
 
@@ -59,22 +63,23 @@ function cellClickHandler(row, col) {
         alert('Победила дружба');
         return;
     }
-
-    FIELD[row][col] = turn;
-    renderSymbolInCell(turn, row, col);
-    turn = turn === CROSS ? ZERO : CROSS;
-    movesCount--;
 }
 
 function findWinner() {
     for (let i = 0; i < FIELD.length; i++) {
         if (FIELD[i][0] !== EMPTY && FIELD[i].every(x => x === FIELD[i][0])) {
+            for (let j = 0; j < FIELD[0].length; j++){
+                renderSymbolInCell(FIELD[i][j], i, j, '#F00')
+            }
             return FIELD[i];
         }
     }
 
     for (let i = 0; i < FIELD.length; i++) {
         if (FIELD[0][i] && FIELD.map(arr => arr[i]).every(x => x === FIELD[0][i])) {
+            for (let j = 0; j < FIELD.length; j++){
+                renderSymbolInCell(FIELD[j][i], j, i, '#F00')
+            }
             return FIELD.map(arr => arr[i]);
         }
     }
@@ -87,10 +92,16 @@ function findWinner() {
         diagonal.push(FIELD[i][FIELD[0].length - i - 1])
     }
 
-    if (mainDiagonal.every(x => x === diagonal[0])){
+    if (mainDiagonal.every(x => x === diagonal[0])) {
+        for (let i = 0; i < FIELDlength; i++){
+            renderSymbolInCell(FIELD[i][i], i, i, '#F00')
+        }
         return mainDiagonal;
     }
-    else if (otherDiagonal.every(x => x === diagonal[0])){
+    else if (otherDiagonal.every(x => x === diagonal[0])) {
+        for (let i = 0; i < FIELDlength; i++){
+            renderSymbolInCell(FIELD[i][FIELD.length - i - 1], i, FIELD.length - i - 1, '#F00')
+        }
         return otherDiagonal;
     }
 
