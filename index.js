@@ -6,7 +6,7 @@ const container = document.getElementById('fieldWrapper');
 
 const FIELD = createField()
     
-let turn = ZERO;
+let turn = CROSS;
 
 startGame();
 addResetListener();
@@ -42,7 +42,9 @@ function createField(dimension = 3) {
 
 function cellClickHandler (row, col) {
     console.log(`Clicked on cell: ${row}, ${col}`);
-    renderSymbolInCell(ZERO, row, col);
+    FIELD[row][col] = turn;
+    renderSymbolInCell(turn, row, col);
+    turn = turn === CROSS ? ZERO : CROSS;
 }
 
 function renderSymbolInCell (symbol, row, col, color = '#333') {
