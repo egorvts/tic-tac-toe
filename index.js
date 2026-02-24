@@ -12,7 +12,8 @@ startGame();
 addResetListener();
 
 function startGame() {
-    renderGrid(3);
+    const dimension = prompt('Введите размер поля. (Например, 3 для поля 3х3)', 3);
+    renderGrid(dimension);
 }
 
 function renderGrid(dimension) {
